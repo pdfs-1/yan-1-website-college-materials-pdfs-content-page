@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1,
+    "college_name": "ABC Engineering College",
+    "college_address": "Hyderabad, Telangana",
+    "program_name": "B.Tech",
+    "branch_name": "Computer Science",
+    "subject_name": "Data Structures",
+    "archive_urls": {
+      "UNIT-1": "https://archive.org/details/r-20-m-1-unit-1/R20%20M1%20-%20UNIT-1/",
+      "TIN": "https://dn710207.ca.archive.org/0/items/nrt_20251201/PPS%20Using%20C%20R20%20-UNIT-1.pdf"
+    }
+  },
+  {
+    "id": 2,
+    "college_name": "XYZ Institute of Technology",
+    "college_address": "Vijayawada, Andhra Pradesh",
+    "program_name": "B.Tech",
+    "branch_name": "Electronics",
+    "subject_name": "Digital Circuits",
+    "archive_urls": {
+      "JUNT": "https://archive.org/download/samplepdf_202403/sample3.pdf"
+    }
+  }
+]
