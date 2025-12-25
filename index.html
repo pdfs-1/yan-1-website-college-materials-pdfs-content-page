@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-    /* Reset & base */
+    /* ---------- Reset & base ---------- */
     *{
         margin:0;
         padding:0;
@@ -21,23 +21,23 @@
         color:#fff;
     }
 
-    /* Layout wrapper */
+    /* ---------- Layout wrapper ---------- */
     #app{
         display:flex;
         flex-direction:column;
-        justify-content:space-between;
+        justify-content:space-between;   /* header – middle – footer */
         align-items:center;
         height:100vh;
         width:100vw;
     }
 
-    /* Header */
+    /* ---------- Header ---------- */
     header{
         text-align:center;
         margin-top:10px;
     }
     header h1{
-        font-size:32px;
+        font-size:32px;                     /* website name – already medium */
         display:flex;
         align-items:center;
         justify-content:center;
@@ -48,8 +48,7 @@
     }
     #siteTagline{
         margin-top:8px;
-        font-size:14px;
-        /* bright‑shining gradient */
+        font-size:20px;                     /* medium (was 14px) */
         background:linear-gradient(90deg,#fffb00,#ff00ff,#00d4ff);
         -webkit-background-clip:text;
         -webkit-text-fill-color:transparent;
@@ -58,19 +57,20 @@
     }
     #highlight{
         margin-top:6px;
-        font-size:20px;
+        font-size:24px;                     /* medium (was 20px) */
         color:#fcd34d;
         text-shadow:0 0 6px rgba(252,211,77,.9);
     }
 
-    /* Home options */
+    /* ---------- Home options (vertical) ---------- */
     #home{
         flex-grow:1;
         width:100%;
         display:flex;
+        flex-direction:column;            /* stack vertically */
         align-items:center;
         justify-content:center;
-        gap:40px;
+        gap:24px;                          /* space between the two buttons */
     }
     .option{
         width:220px;
@@ -90,7 +90,7 @@
         box-shadow:0 12px 30px rgba(0,0,0,.4);
     }
 
-    /* Iframe view */
+    /* ---------- Iframe view ---------- */
     #iframeContainer{
         position:fixed;
         inset:0;
@@ -125,16 +125,16 @@
         background:rgba(255,0,0,.85);
     }
 
-    /* Footer */
+    /* ---------- Footer (medium size, slightly above bottom) ---------- */
     footer{
         width:100%;
         text-align:right;
-        padding:0 20px 8px;
-        font-size:10px;
+        padding:0 20px 12px;               /* bottom padding lifts the text a bit */
+        font-size:16px;                    /* medium size (was 10px) */
         color:#9ca3af;
     }
 
-    /* Floating chat icon */
+    /* ---------- Floating chat icon ---------- */
     #chatIcon{
         position:fixed;
         bottom:48px;
@@ -157,7 +157,7 @@
         background:#2563eb;
     }
 
-    /* Modal */
+    /* ---------- Modal (feedback) ---------- */
     .modal{
         position:fixed;
         inset:0;
@@ -190,7 +190,7 @@
 
 <body>
 <div id="app">
-    <!-- Header with name, icon, tagline, highlight -->
+    <!-- Header -->
     <header>
         <h1><span id="siteIcon">🎓</span>Campus Vault</h1>
         <p id="siteTagline">
@@ -200,17 +200,17 @@
         <p id="highlight">“Quiet pages, clear minds.”</p>
     </header>
 
-    <!-- Home options -->
+    <!-- Home options (Materials on top, Papers below) -->
     <div id="home">
         <div class="option" onclick="openContent('materials_content.html')">MATERIALS</div>
         <div class="option" onclick="openContent('papers_content.html')">PAPERS</div>
     </div>
 
-    <!-- Footer -->
+    <!-- Footer (medium size, slightly above the bottom) -->
     <footer>© 2026 Campus Vault · Built with ❤️ by YAN</footer>
 </div>
 
-<!-- Iframe container -->
+<!-- Iframe container (full‑screen view) -->
 <div id="iframeContainer">
     <div id="closeBtn" onclick="closeIframe()">✕</div>
     <iframe id="contentFrame"
@@ -254,9 +254,9 @@
 </div>
 
 <script>
-/* ----------- Navigation (materials / papers) ----------- */
+/* ---------- Navigation (materials / papers) ---------- */
 function openContent(url) {
-    // hide the page UI
+    // hide the main UI
     document.querySelector('header').style.display = 'none';
     document.getElementById('home').style.display = 'none';
     document.querySelector('footer').style.display = 'none';
@@ -277,14 +277,14 @@ function closeIframe() {
     document.getElementById('chatIcon').style.display = 'flex';
 }
 
-/* ----------- Feedback modal & countdown ----------- */
+/* ---------- Feedback modal & countdown ---------- */
 let feedbackInterval = null;
 function showFeedback() {
     const modal = document.getElementById('feedbackModal');
     const timerSpan = document.getElementById('timer');
     let seconds = 5;
 
-    // Reset any existing timer
+    // Reset any previous timer
     if (feedbackInterval) clearInterval(feedbackInterval);
 
     modal.classList.remove('hidden');
@@ -297,7 +297,7 @@ function showFeedback() {
         } else {
             clearInterval(feedbackInterval);
             modal.classList.add('hidden');
-            // redirect after countdown
+            // Redirect after the countdown finishes
             window.location.href = 'https://github.com/OpenThoughtVoice/OpenThoughtVoice/discussions/4';
         }
     }, 1000);
