@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>College Archive Viewer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<style>
+  body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#0f172a;
+    color:#fff;
+  }
+  header{
+    padding:15px;
+    background:#020617;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  button{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:.95rem;
+  }
+  button:hover{background:#1d4ed8;}
+  .hidden{display:none;}
+
+  /* ---------- SEARCH BAR ---------- */
+  #searchNav{padding:0 15px;}
+  #searchBackBtn{
+    background:#2563eb;
+    margin-bottom:8px;
+  }
+  .search-container{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 15px;
+    background:#020617;
+  }
+  .search-container input{
+    flex:1;
+    padding:8px;
+    border:1px solid #3b82f6;
+    border-radius:6px;
+    background:#0f172a;
+    color:#fff;
+  }
+  .search-container button{
+    padding:8px 12px;
+    background:#2563eb;
+  }
+  #advancedToggle{
+    background:#4b5563;
+    padding:8px 12px;
+  }
+  #advancedOptions{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:0 15px 10px;
+    background:#1e293b;
+  }
+  #advancedOptions.hidden{display:none;}
+
+  /* ---------- GRID ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:15px;
+    padding:15px;
+  }
+  .card{
+    background:#020617;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 0 10px rgba(0,0,0,.4);
+  }
+  .card p{
+    margin:4px 0;
+    font-size:14px;
+    opacity:.9;
+  }
+  .actions{
+    margin-top:10px;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .share-btn{
+    background:transparent;
+    border:none;
+    color:#a5b4fc;
+    cursor:pointer;
+    font-size:1.2rem;
+    padding:4px;
+  }
+  .share-btn:hover{color:#fff;}
+
+  /* ---------- URL PAGE ---------- */
+  #urlPage{padding:15px;}
+  .url-btn{
+    display:block;
+    width:100%;
+    margin-top:10px;
+    background:#16a34a;
+  }
+  .url-btn:hover{background:#15803d;}
+
+  /* ---------- PDF VIEWER ---------- */
+  #viewer{
+    position:fixed;
+    inset:0;
+    background:#000;
+    display:none;
+    flex-direction:column;
+    z-index:9999;
+  }
+  #viewer header{
+    background:#020617;
+    padding:10px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  #viewer iframe{
+    flex:1;
+    width:100%;
+    border:none;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- HEADER (title now blank) -->
+<header>
+  <button id="navBackBtn" class="hidden">⬅ Back</button>
+  <h2 id="title"></h2>
+</header>
+
+<!-- BACK BUTTON THAT APPEARS AFTER SEARCH -->
+<div id="searchNav">
+  <button id="searchBackBtn" class="hidden">← Back to All</button>
+</div>
+
+<!-- SEARCH BAR -->
+<div class="search-container">
+  <input type="text" id="searchInput" placeholder="Enter search term…">
+  <button id="searchBtn">Search</button>
+  <button id="advancedToggle">--></button>
+</div>
+
+<!-- ADVANCED SEARCH OPTIONS -->
+<div id="advancedOptions" class="hidden">
+  <label for="searchField">Search by:</label>
+  <select id="searchField">
+    <option value="subject_name">Subject</option>
+    <option value="college_name">College</option>
+    <option value="id">ID</option>
+    <option value="program_name">Program</option>
+    <option value="branch_name">Branch</option>
+  </select>
+  <button id="closeAdvanced">✖</button>
+</div>
+
+<!-- GRID PAGE -->
+<div id="gridPage">
+  <div id="grid" class="grid"></div>
+</div>
+
+<!-- URL LIST PAGE -->
+<div id="urlPage" class="hidden"></div>
+
+<!-- PDF VIEWER -->
+<div id="viewer">
+  <header>
+    <button onclick="closeViewer()">✖ Close</button>
+    <button onclick="goBack()">⬅ Back</button>
+  </header>
+  <iframe id="pdfFrame"></iframe>
+</div>
+
+<script>
+/* ==============================================================
+   GLOBAL STATE
+   ============================================================== */
+let dataStore = [];          // All data from data.json
+let displayedData = [];      // Currently shown (all or after a filter)
+let currentItem = null;      // The item whose PDFs are being displayed
+let page = 'grid';           // 'grid' | 'urls' | 'pdf'
+let filtered = false;        // true after a search
+const baseShareURL =
+  'https://yan-1-related-1.github.io/yan-1-website-shared-links-redirecting/college-materials-pdfs-content-page-shared-links-redirecting.html';
+
+/* ==============================================================
+   FETCH DATA & INITIALISE
+   ============================================================== */
+function fetchData() {
+  fetch('data.json')
+    .then(r => r.json())
+    .then(json => {
+      dataStore = json;
+      displayedData = json;
+      renderGrid(displayedData);
+
+      // If a shared link with ?grid_id=… is used, open that item automatically
+      const params = new URLSearchParams(window.location.search);
+      const gridId = params.get('grid_id');
+      if (gridId) {
+        const id = parseInt(gridId, 10);
+        if (!isNaN(id)) openUrlPage(id);
+      }
+    })
+    .catch(err => console.error('Failed to load data.json', err));
+}
+
+/* ==============================================================
+   RENDER GRID
+   ============================================================== */
+function renderGrid(data) {
+  page = 'grid';
+  // No page title – it was removed per request
+  document.getElementById('title').textContent = '';
+  document.getElementById('gridPage').classList.remove('hidden');
+  document.getElementById('urlPage').classList.add('hidden');
+  document.getElementById('viewer').style.display = 'none';
+
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  data.forEach(item => {
+    const shareLink = `${baseShareURL}?grid_id=${item.id}`;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <p><b>ID:</b> ${item.id}</p>
+      <h3>${item.college_name}</h3>
+      <p><b>Address:</b> ${item.college_address}</p>
+      <p><b>Program:</b> ${item.program_name}</p>
+      <p><b>Branch:</b> ${item.branch_name}</p>
+      <p><b>Subject:</b> ${item.subject_name}</p>
+      <div class="actions">
+        <button onclick="openUrlPage(${item.id})">Open</button>
+        <button class="share-btn" title="Share / copy link" onclick="shareLink('${shareLink}')">🔗</button>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+
+  // Show “Back to All” button when a filter is active
+  document.getElementById('searchBackBtn').style.display = filtered ? 'inline-block' : 'none';
+  updateNavBackVisibility();
+}
+
+/* ==============================================================
+   SHARE LINK – Web Share API → clipboard → prompt fallback
+   ============================================================== */
+function shareLink(link) {
+  if (navigator.share) {
+    navigator.share({
+      title: 'College Archive Material',
+      text: 'Check out this material from the college archive.',
+      url: link
+    }).catch(() => fallbackCopy(link));
+  } else {
+    fallbackCopy(link);
+  }
+}
+function fallbackCopy(link) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link)
+      .then(() => alert('Link copied to clipboard:\n' + link))
+      .catch(() => prompt('Copy this link', link));
+  } else {
+    prompt('Copy this link', link);
+  }
+}
+
+/* ==============================================================
+   SHOW PDF LIST FOR ONE ITEM (archive_urls is an OBJECT)
+   ============================================================== */
+function openUrlPage(id) {
+  const item = dataStore.find(x => x.id === id);
+  if (!item) {
+    alert('Item not found');
+    return;
+  }
+  currentItem = item;
+  page = 'urls';
+  document.getElementById('title').textContent = 'Available PDFs';
+  document.getElementById('gridPage').classList.add('hidden');
+  document.getElementById('urlPage').classList.remove('hidden');
+
+  const container = document.getElementById('urlPage');
+
+  // `archive_urls` is now an object: { "LABEL": "URL", … }
+  const buttons = Object.entries(item.archive_urls || {})
+    .map(([label, url]) => {
+      const safeLabel = label || 'PDF';
+      // Escape single quotes in the URL for the onclick attribute
+      const safeUrl = url.replace(/'/g, "\\'");
+      return `<button class="url-btn" onclick="openPDF('${safeUrl}')">${safeLabel}</button>`;
+    })
+    .join('');
+
+  container.innerHTML = `
+    <p><b>ID:</b> ${item.id}</p>
+    <h3>${item.college_name}</h3>
+    <p><b>Address:</b> ${item.college_address}</p>
+    <p><b>Subject:</b> ${item.subject_name}</p>
+    ${buttons}
+  `;
+  updateNavBackVisibility();
+}
+
+/* ==============================================================
+   PDF VIEWER
+   ============================================================== */
+function openPDF(url) {
+  page = 'pdf';
+  document.getElementById('pdfFrame').src =
+    `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
+  document.getElementById('viewer').style.display = 'flex';
+  updateNavBackVisibility();
+}
+function closeViewer() {
+  document.getElementById('pdfFrame').src = '';
+  document.getElementById('viewer').style.display = 'none';
+  page = 'urls';
+  updateNavBackVisibility();
+}
+
+/* ==============================================================
+   NAVIGATION (Back buttons)
+   ============================================================== */
+function goBack() {
+  if (page === 'pdf') {
+    closeViewer();
+  } else if (page === 'urls') {
+    renderGrid(displayedData);
+  }
+}
+function resetSearch() {
+  displayedData = dataStore;
+  filtered = false;
+  document.getElementById('searchInput').value = '';
+  renderGrid(displayedData);
+}
+
+/* ==============================================================
+   SEARCH LOGIC
+   ============================================================== */
+function performSearch() {
+  const term = document.getElementById('searchInput').value.trim().toLowerCase();
+  const field = document.getElementById('searchField').value;
+
+  if (!term) {
+    resetSearch();
+    return;
+  }
+
+  let results = [];
+  if (field === 'id') {
+    const num = parseInt(term, 10);
+    if (!isNaN(num)) results = dataStore.filter(item => item.id === num);
+  } else {
+    results = dataStore.filter(item => {
+      const value = (item[field] || '').toString().toLowerCase();
+      return value.includes(term);
+    });
+  }
+
+  displayedData = results;
+  filtered = true;
+  renderGrid(displayedData);
+}
+
+/* ==============================================================
+   UI HELPERS
+   ============================================================== */
+function updateNavBackVisibility() {
+  const backBtn = document.getElementById('navBackBtn');
+  if (page === 'urls' || page === 'pdf') {
+    backBtn.classList.remove('hidden');
+  } else {
+    backBtn.classList.add('hidden');
+  }
+}
+
+/* ==============================================================
+   EVENT LISTENERS
+   ============================================================== */
+document.getElementById('searchBtn').addEventListener('click', performSearch);
+document.getElementById('searchInput')
+        .addEventListener('keypress', e => { if (e.key === 'Enter') performSearch(); });
+
+document.getElementById('advancedToggle')
+        .addEventListener('click', () => {
+          document.getElementById('advancedOptions').classList.toggle('hidden');
+        });
+
+document.getElementById('closeAdvanced')
+        .addEventListener('click', () => {
+          document.getElementById('advancedOptions').classList.add('hidden');
+        });
+
+document.getElementById('searchBackBtn')
+        .addEventListener('click', resetSearch);
+
+document.getElementById('navBackBtn')
+        .addEventListener('click', goBack);
+
+/* ==============================================================
+   START APP
+   ============================================================== */
+fetchData();
+</script>
+
+</body>
+</html>
