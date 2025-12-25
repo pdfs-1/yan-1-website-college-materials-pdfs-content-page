@@ -2,151 +2,307 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Campus Vault</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Content Hub</title>
 
 <style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", Arial, sans-serif;
-}
+    /* Reset & base */
+    *{
+        margin:0;
+        padding:0;
+        box-sizing:border-box;
+        font-family:"Segoe UI",Arial,sans-serif;
+    }
+    body{
+        width:100vw;
+        height:100vh;
+        overflow:hidden;
+        background:#0f172a;
+        color:#fff;
+    }
 
-body {
-  width: 100vw;
-  height: 100vh;
-  background: #0f172a;
-  color: #fff;
-  overflow: hidden;
-}
+    /* Layout wrapper */
+    #app{
+        display:flex;
+        flex-direction:column;
+        justify-content:space-between;
+        align-items:center;
+        height:100vh;
+        width:100vw;
+    }
 
-/* ---------- HOME OPTIONS ---------- */
-#home {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 40px;
-}
+    /* Header */
+    header{
+        text-align:center;
+        margin-top:10px;
+    }
+    header h1{
+        font-size:32px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+    }
+    #siteIcon{
+        font-size:32px;
+    }
+    #siteTagline{
+        margin-top:8px;
+        font-size:14px;
+        /* bright‑shining gradient */
+        background:linear-gradient(90deg,#fffb00,#ff00ff,#00d4ff);
+        -webkit-background-clip:text;
+        -webkit-text-fill-color:transparent;
+        background-clip:text;
+        color:transparent;
+    }
+    #highlight{
+        margin-top:6px;
+        font-size:20px;
+        color:#fcd34d;
+        text-shadow:0 0 6px rgba(252,211,77,.9);
+    }
 
-.option {
-  width: 220px;
-  height: 120px;
-  background: linear-gradient(135deg, #2563eb, #1e40af);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
-}
+    /* Home options */
+    #home{
+        flex-grow:1;
+        width:100%;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        gap:40px;
+    }
+    .option{
+        width:220px;
+        height:120px;
+        background:linear-gradient(135deg,#2563eb,#1e40af);
+        border-radius:14px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:22px;
+        font-weight:600;
+        cursor:pointer;
+        transition:transform .2s,box-shadow .2s;
+    }
+    .option:hover{
+        transform:scale(1.05);
+        box-shadow:0 12px 30px rgba(0,0,0,.4);
+    }
 
-.option:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-}
+    /* Iframe view */
+    #iframeContainer{
+        position:fixed;
+        inset:0;
+        display:none;
+        background:#000;
+        z-index:9999;
+    }
+    #iframeContainer iframe{
+        width:100%;
+        height:100%;
+        border:none;
+    }
+    #closeBtn{
+        position:absolute;
+        top:12px;
+        right:16px;
+        width:44px;
+        height:44px;
+        border-radius:50%;
+        background:rgba(0,0,0,.6);
+        color:#fff;
+        font-size:26px;
+        font-weight:bold;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+        z-index:10000;
+        transition:background .2s;
+    }
+    #closeBtn:hover{
+        background:rgba(255,0,0,.85);
+    }
 
-/* ---------- IFRAME VIEW ---------- */
-#iframeContainer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: none;
-  background: #000;
-  z-index: 9999;
-}
+    /* Footer */
+    footer{
+        width:100%;
+        text-align:right;
+        padding:0 20px 8px;
+        font-size:10px;
+        color:#9ca3af;
+    }
 
-#iframeContainer iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
+    /* Floating chat icon */
+    #chatIcon{
+        position:fixed;
+        bottom:48px;
+        right:24px;
+        width:50px;
+        height:50px;
+        border-radius:50%;
+        background:#1e40af;
+        color:#fff;
+        font-size:28px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        cursor:pointer;
+        box-shadow:0 4px 12px rgba(0,0,0,.5);
+        transition:background .2s;
+        z-index:1000;
+    }
+    #chatIcon:hover{
+        background:#2563eb;
+    }
 
-/* ---------- CLOSE BUTTON ---------- */
-#closeBtn {
-  position: absolute;
-  top: 12px;
-  right: 16px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.6);
-  color: #fff;
-  font-size: 26px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10000;
-  transition: background 0.2s;
-}
-
-#closeBtn:hover {
-  background: rgba(255,0,0,0.85);
-}
+    /* Modal */
+    .modal{
+        position:fixed;
+        inset:0;
+        background:rgba(0,0,0,.6);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        z-index:11000;
+    }
+    .modal.hidden{
+        display:none;
+    }
+    .modal .modal-content{
+        background:#1f2937;
+        padding:20px 24px;
+        border-radius:12px;
+        text-align:center;
+        max-width:360px;
+        color:#fff;
+    }
+    .modal p{
+        margin:12px 0;
+    }
+    .modal a{
+        color:#60a5fa;
+        text-decoration:underline;
+    }
 </style>
 </head>
 
 <body>
+<div id="app">
+    <!-- Header with name, icon, tagline, highlight -->
+    <header>
+        <h1><span id="siteIcon">🎓</span>Campus Vault</h1>
+        <p id="siteTagline">
+            A curated digital repository of college materials, lecture notes, and previous-year question
+            papers — crafted to support clarity, confidence, and academic success.
+        </p>
+        <p id="highlight">“Quiet pages, clear minds.”</p>
+    </header>
 
-<!-- HOME OPTIONS -->
-<div id="home">
-  <div class="option" onclick="openContent('materials_content.html')">
-    MATERIALS
-  </div>
-  <div class="option" onclick="openContent('papers_content.html')">
-    PAPERS
-  </div>
+    <!-- Home options -->
+    <div id="home">
+        <div class="option" onclick="openContent('materials_content.html')">MATERIALS</div>
+        <div class="option" onclick="openContent('papers_content.html')">PAPERS</div>
+    </div>
+
+    <!-- Footer -->
+    <footer>© 2026 Campus Vault · Built with ❤️ by YAN</footer>
 </div>
 
-<!-- IFRAME CONTAINER -->
+<!-- Iframe container -->
 <div id="iframeContainer">
-  <div id="closeBtn" onclick="closeIframe()">✕</div>
-  <iframe
-    id="contentFrame"
-    allow="
-      accelerometer;
-      autoplay;
-      camera;
-      clipboard-read;
-      clipboard-write;
-      encrypted-media;
-      fullscreen;
-      geolocation;
-      gyroscope;
-      magnetometer;
-      microphone;
-      midi;
-      payment;
-      picture-in-picture;
-      screen-wake-lock;
-      usb;
-      web-share
-    "
-    allowfullscreen
-  ></iframe>
+    <div id="closeBtn" onclick="closeIframe()">✕</div>
+    <iframe id="contentFrame"
+        allow="
+            accelerometer;
+            autoplay;
+            camera;
+            clipboard-read;
+            clipboard-write;
+            encrypted-media;
+            fullscreen;
+            geolocation;
+            gyroscope;
+            magnetometer;
+            microphone;
+            midi;
+            payment;
+            picture-in-picture;
+            screen-wake-lock;
+            usb;
+            web-share"
+        allowfullscreen>
+    </iframe>
+</div>
+
+<!-- Floating chat icon -->
+<div id="chatIcon">💬</div>
+
+<!-- Feedback modal -->
+<div id="feedbackModal" class="modal hidden">
+    <div class="modal-content">
+        <p>🔐 Login or sign up with GitHub to give the feedback.</p>
+        <p>📺 Or click the video link
+            <a href="https://archive.org/details/panfda" target="_blank">
+                https://archive.org/details/panfda
+            </a>
+            to know how to give feedback.
+        </p>
+        <p id="countdown">Redirecting in <span id="timer">5</span> seconds...</p>
+    </div>
 </div>
 
 <script>
+/* ----------- Navigation (materials / papers) ----------- */
 function openContent(url) {
-  document.getElementById("home").style.display = "none";
-  document.getElementById("iframeContainer").style.display = "block";
-  document.getElementById("contentFrame").src = url;
-}
+    // hide the page UI
+    document.querySelector('header').style.display = 'none';
+    document.getElementById('home').style.display = 'none';
+    document.querySelector('footer').style.display = 'none';
+    document.getElementById('chatIcon').style.display = 'none';
 
+    // show iframe
+    document.getElementById('iframeContainer').style.display = 'block';
+    document.getElementById('contentFrame').src = url;
+}
 function closeIframe() {
-  document.getElementById("contentFrame").src = "";
-  document.getElementById("iframeContainer").style.display = "none";
-  document.getElementById("home").style.display = "flex";
-}
-</script>
+    document.getElementById('contentFrame').src = '';
+    document.getElementById('iframeContainer').style.display = 'none';
 
+    // restore UI
+    document.querySelector('header').style.display = 'block';
+    document.getElementById('home').style.display = 'flex';
+    document.querySelector('footer').style.display = 'block';
+    document.getElementById('chatIcon').style.display = 'flex';
+}
+
+/* ----------- Feedback modal & countdown ----------- */
+let feedbackInterval = null;
+function showFeedback() {
+    const modal = document.getElementById('feedbackModal');
+    const timerSpan = document.getElementById('timer');
+    let seconds = 5;
+
+    // Reset any existing timer
+    if (feedbackInterval) clearInterval(feedbackInterval);
+
+    modal.classList.remove('hidden');
+    timerSpan.textContent = seconds;
+
+    feedbackInterval = setInterval(() => {
+        seconds--;
+        if (seconds > 0) {
+            timerSpan.textContent = seconds;
+        } else {
+            clearInterval(feedbackInterval);
+            modal.classList.add('hidden');
+            // redirect after countdown
+            window.location.href = 'https://github.com/OpenThoughtVoice/OpenThoughtVoice/discussions/4';
+        }
+    }, 1000);
+}
+document.getElementById('chatIcon').addEventListener('click', showFeedback);
+</script>
 </body>
 </html>
